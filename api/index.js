@@ -1,45 +1,25 @@
 const { calculateDestinyChart } = require('./charts/calc.js');
-const fs = require('fs');
-const path = require('path');
 
 module.exports = async (req, res) => {
   try {
-    const q = req.method === 'POST' ? req.body : req.query;
-    const { birth, topic = 'personality' } = q || {};
+    const { birth, topic = 'personality' } = req.query;
+    if (!birth) return res.status(400).json({ error: 'Missing birth param' });
 
-    if (!birth) {
-      return res.status(400).json({ error: 'Missing birth param' });
-    }
+    const chart = await calculateDestinyChart(birth);
+    const interpUrl = `https://destiny-chart-api.vercel.app/data/interpretation/${topic}.json`;
 
-    const chart = calculateDestinyChart(birth);
-
-    // ใช้ __dirname เพื่อให้ path ถูกแม้ตอน deploy
-    const interpPath = path.join(__dirname, 'data', 'interpretation', `${topic}.json`);
-    if (!fs.existsSync(interpPath)) {
-      return res.status(404).json({ error: `File not found: ${topic}` });
-    }
-
-    const interpretationData = JSON.parse(fs.readFileSync(interpPath, 'utf8'));
-    const result = buildInterpretation(chart, interpretationData);
+    const resp = await fetch(interpUrl);
+    const interpretation = await resp.json();
 
     res.setHeader('Access-Control-Allow-Origin', '*');
-    return res.status(200).json({
+    res.status(200).json({
       input: { birth, topic },
       chart,
-      interpretation: result,
+      interpretation,
       generated_at: new Date().toISOString(),
     });
   } catch (err) {
-    console.error('Serverless error:', err);
+    console.error(err);
     res.status(500).json({ error: 'Internal Server Error', details: err.message });
   }
 };
-
-function buildInterpretation(chart, data) {
-  const out = {};
-  for (const p of chart.planets_position) {
-    const key = `${p.planet}_in_${p.houseIndex}`;
-    out[key] = data[key] || null;
-  }
-  return out;
-}

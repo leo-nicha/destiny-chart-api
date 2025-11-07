@@ -1,12 +1,27 @@
 const fs = require('fs');
 const path = require('path');
+const https = require('https');
 
-function calculateDestinyChart(birthISO) {
-  const housesPath = path.join(__dirname, '../data/rules/houses.json');
-  const planetsPath = path.join(__dirname, '../data/rules/planets.json');
+function fetchJSON(url) {
+  return new Promise((resolve, reject) => {
+    https.get(url, (res) => {
+      let data = '';
+      res.on('data', (chunk) => (data += chunk));
+      res.on('end', () => {
+        try {
+          resolve(JSON.parse(data));
+        } catch (err) {
+          reject(err);
+        }
+      });
+    }).on('error', reject);
+  });
+}
 
-  const housesRaw = JSON.parse(fs.readFileSync(housesPath, 'utf8'));
-  const planetsRaw = JSON.parse(fs.readFileSync(planetsPath, 'utf8'));
+async function calculateDestinyChart(birthISO) {
+  const base = 'https://destiny-chart-api.vercel.app/data/rules';
+  const housesRaw = await fetchJSON(`${base}/houses.json`);
+  const planetsRaw = await fetchJSON(`${base}/planets.json`);
 
   const houses = [];
   for (let i = 1; i <= 12; i++) {
