@@ -22,6 +22,8 @@ async function calculateDestinyChart(birthISO) {
   const base = 'https://destiny-chart-api.vercel.app/data/rules';
   const housesRaw = await fetchJSON(`${base}/houses.json`);
   const planetsRaw = await fetchJSON(`${base}/planets.json`);
+  const aspectsRaw = await fetchJSON(`${base}/aspects.json`);
+  const statusRaw = await fetchJSON(`${base}/status.json`);
 
   const houses = [];
   for (let i = 1; i <= 12; i++) {
