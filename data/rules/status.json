@@ -1,0 +1,11 @@
+{
+  "sun":     { "exalt": "เมษ",   "debilitate": "ตุลย์" },
+  "moon":    { "exalt": "พฤษภ", "debilitate": "พิจิก" },
+  "mars":    { "exalt": "มังกร", "debilitate": "กรกฎ" },
+  "mercury": { "exalt": "กันย์", "debilitate": "มีน" },
+  "jupiter": { "exalt": "กรกฎ", "debilitate": "มังกร" },
+  "venus":   { "exalt": "มีน",  "debilitate": "กันย์" },
+  "saturn":  { "exalt": "ตุลย์", "debilitate": "เมษ" },
+  "rahu":    { "exalt": "พฤษภ", "debilitate": "พิจิก" },
+  "ketu":    { "exalt": "พิจิก", "debilitate": "พฤษภ" }
+}
