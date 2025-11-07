@@ -5,45 +5,41 @@ const path = require('path');
 module.exports = async (req, res) => {
   try {
     const q = req.method === 'POST' ? req.body : req.query;
-    const { birth, topic = 'personality', lat, lon } = q || {};
+    const { birth, topic = 'personality' } = q || {};
 
     if (!birth) {
-      return res.status(400).json({ error: 'Missing parameter: birth (ISO 8601, e.g. 1994-03-15T14:45)' });
+      return res.status(400).json({ error: 'Missing birth param' });
     }
 
-    // คำนวณดวงพื้น
-    const chart = calculateDestinyChart(birth, {
-      lat: lat ? parseFloat(lat) : undefined,
-      lon: lon ? parseFloat(lon) : undefined,
-    });
+    const chart = calculateDestinyChart(birth);
 
-    // โหลด interpretation
-    const interpPath = path.join(process.cwd(), 'data', 'interpretation', `${topic}.json`);
+    // ใช้ __dirname เพื่อให้ path ถูกแม้ตอน deploy
+    const interpPath = path.join(__dirname, 'data', 'interpretation', `${topic}.json`);
     if (!fs.existsSync(interpPath)) {
-      return res.status(404).json({ error: `Interpretation file not found for topic: ${topic}` });
+      return res.status(404).json({ error: `File not found: ${topic}` });
     }
 
-    const interpretationData = JSON.parse(fs.readFileSync(interpPath, 'utf-8'));
-    const interpretation = buildInterpretation(chart, interpretationData);
+    const interpretationData = JSON.parse(fs.readFileSync(interpPath, 'utf8'));
+    const result = buildInterpretation(chart, interpretationData);
 
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.status(200).json({
-      input: { birth, topic, lat, lon },
+    return res.status(200).json({
+      input: { birth, topic },
       chart,
-      interpretation,
+      interpretation: result,
       generated_at: new Date().toISOString(),
     });
   } catch (err) {
-    console.error('API error:', err);
+    console.error('Serverless error:', err);
     res.status(500).json({ error: 'Internal Server Error', details: err.message });
   }
 };
 
-function buildInterpretation(chart, interpretationData) {
-  const result = {};
+function buildInterpretation(chart, data) {
+  const out = {};
   for (const p of chart.planets_position) {
     const key = `${p.planet}_in_${p.houseIndex}`;
-    result[key] = interpretationData[key] || null;
+    out[key] = data[key] || null;
   }
-  return result;
+  return out;
 }
