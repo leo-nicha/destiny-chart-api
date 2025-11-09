@@ -9,11 +9,26 @@ module.exports = async (req, res) => {
 
     const chart = calculateDestinyChart(birth);
 
-    const interpPath = path.join(process.cwd(), 'public/data/interpretation', `${topic}.json`);
-    if (!fs.existsSync(interpPath)) {
-      return res.status(404).json({ error: `File not found: ${topic}.json` });
+    const interpBase = path.join(process.cwd(), 'public/data/interpretation');
+
+    // ✅ รองรับ topic=all
+    let topics = [];
+    if (topic === 'all') {
+      topics = ['personality', 'career', 'love', 'finance'];
+    } else {
+      topics = [topic];
     }
-    const interpretation = JSON.parse(fs.readFileSync(interpPath, 'utf8'));
+
+    const interpretation = {};
+
+    for (const t of topics) {
+      const filePath = path.join(interpBase, `${t}.json`);
+      if (fs.existsSync(filePath)) {
+        interpretation[t] = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+      } else {
+        interpretation[t] = { error: `File not found: ${t}.json` };
+      }
+    }
 
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.status(200).json({
