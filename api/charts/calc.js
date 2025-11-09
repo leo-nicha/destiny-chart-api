@@ -31,6 +31,7 @@ async function calculateDestinyChart(birthISO) {
   }
 
   const planetKeys = Object.keys(planetsRaw);
+
   const birthDate = new Date(birthISO);
   const seed = Math.floor(birthDate.getTime() / (1000 * 60 * 60)) % 12;
   const lagnamIndex = ((seed % 12) + 1);
@@ -41,6 +42,8 @@ async function calculateDestinyChart(birthISO) {
       planet: planetKey,
       houseIndex,
       houseName: houses[houseIndex],
+      aspect: aspectsRaw[planetKey] || null,
+      status: statusRaw[planetKey] || null
     };
   });
 
