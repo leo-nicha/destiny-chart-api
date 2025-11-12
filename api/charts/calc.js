@@ -17,14 +17,13 @@ function calculateDestinyChart(birthISO) {
   const planetKeys = Object.keys(planetsRaw);
   const birthDate = new Date(birthISO);
 
-  // ✅ แปลงวันเวลาเกิดเป็นค่าระดับองศา sidereal (Lahiri)
+  // 🔭 คำนวณลัคนา (Sidereal Lahiri simplified)
   const day = birthDate.getUTCDate();
   const month = birthDate.getUTCMonth() + 1;
   const year = birthDate.getUTCFullYear();
   const hour = birthDate.getUTCHours() + birthDate.getUTCMinutes() / 60;
 
-  // คำนวณดัชนีลัคนาแบบ Lahiri simplified (ไม่ต้องใช้ external lib)
-  const lahiriOffset = 23.85; // ค่าเฉลี่ย Lahiri Ayanamsa
+  const lahiriOffset = 23.85; // ค่าเฉลี่ย Ayanamsa
   const baseDegree = ((month * 30) + day + hour / 2 + (year % 12) * 2 - lahiriOffset) % 360;
   const lagnamIndex = Math.floor((baseDegree / 30) % 12) + 1;
 
