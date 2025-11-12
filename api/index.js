@@ -41,10 +41,16 @@ module.exports = async (req, res) => {
       if (fs.existsSync(filePath)) {
         const dataset = JSON.parse(fs.readFileSync(filePath, "utf8"));
 
-        interpretation[t] = chart.planets_position.reduce((acc, planet) => {
-          const key = `${planet.planet}_in_${planet.houseIndex}`;
-          acc[planet.planet] =
-            dataset[key] || "ยังไม่มีคำทำนายสำหรับตำแหน่งนี้";
+        interpretation[t] = chart.planets_position.reduce((acc, p) => {
+          const possibleKeys = [
+            `${p.planet}_in_${p.houseName?.toLowerCase()}`,
+            `${p.planet}_in_${p.houseIndex}`,
+            p.planet
+          ];
+
+          acc[p.planet] =
+            possibleKeys.map(k => dataset[k]).find(v => v !== undefined) ||
+            "ยังไม่มีคำทำนายสำหรับตำแหน่งนี้";
           return acc;
         }, {});
       } else {
