@@ -15,13 +15,24 @@ function calculateDestinyChart(birthISO) {
   }
 
   const planetKeys = Object.keys(planetsRaw);
+
+  // 🧭 ตรวจว่าปีเป็น พ.ศ. หรือไม่
   const birthDate = new Date(birthISO);
+  let year = birthDate.getUTCFullYear();
+  if (year > 2400) {
+    // ถ้ามากกว่า 2400 ถือว่าเป็นปีพุทธศักราช
+    year -= 543;
+  }
+
+  // 🧮 สร้าง Date ใหม่หลังแปลงเป็น ค.ศ.
+  const correctedBirth = new Date(
+    Date.UTC(year, birthDate.getUTCMonth(), birthDate.getUTCDate(), birthDate.getUTCHours(), birthDate.getUTCMinutes())
+  );
 
   // 🔭 คำนวณลัคนา (Sidereal Lahiri simplified)
-  const day = birthDate.getUTCDate();
-  const month = birthDate.getUTCMonth() + 1;
-  const year = birthDate.getUTCFullYear();
-  const hour = birthDate.getUTCHours() + birthDate.getUTCMinutes() / 60;
+  const day = correctedBirth.getUTCDate();
+  const month = correctedBirth.getUTCMonth() + 1;
+  const hour = correctedBirth.getUTCHours() + correctedBirth.getUTCMinutes() / 60;
 
   const lahiriOffset = 23.85; // ค่าเฉลี่ย Ayanamsa
   const baseDegree = ((month * 30) + day + hour / 2 + (year % 12) * 2 - lahiriOffset) % 360;
@@ -40,6 +51,7 @@ function calculateDestinyChart(birthISO) {
 
   return {
     birthISO,
+    birth_converted: correctedBirth.toISOString(),
     lagnamIndex,
     lagnamName: houses[lagnamIndex],
     planets_position,
